@@ -1,0 +1,274 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671
+{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 TimesNewRomanPSMT;\f2\ftech\fcharset0 Wingdings-Regular;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww20160\viewh12680\viewkind0
+\deftab720
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\f0\fs32 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 ; D\'e9claration des variables 
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 DIZMS EQU 30H\uc0\u8232 SEC EQU 31H\u8232 MINT EQU 32H\u8232 HEURE EQU 33H PAS_MATIN_POIDS_FORT EQU 34H PAS_MATIN_POIDS_FAIBLE EQU 35H PAS_SOIR_POIDS_FORT EQU 36H PAS_SOIR_POIDS_FAIBLE EQU 37H INT_ENABLE EQU 2EH 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INT_MAP EQU 2FH DATA_FORMAT EQU 40H VITESSE EQU 41H RAPIDE EQU 42H MOYEN EQU 43H 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 LENT EQU 44H\uc0\u8232 K EQU 45H\u8232 Min EQU 46H ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Programme principal 
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ORG 0H\uc0\u8232 SJMP RESET\u8232 ORGH 03H 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INT_BOUTON:\uc0\u8232 SJMP GESTION_MODE 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ORG 0BH 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 RETI ORG 13H 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 SJMP INT_PODOMETRE\uc0\u8232 ORG 1BH //S\'e9curit\'e9 du programme RETI\u8232 ORG 23H\u8232 SJMP INT_SERIAL\u8232 ORG 50H\u8232 SJMP INT_TIMER2 GESTION_MODE: 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Initialisation du Timer 
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 MOV TMR3CN, #0000 0101 B MOV TMR3RLL, #E0H\uc0\u8232 SETB TR3\u8232 MOV DIZMS, #00H 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV SEC, #00H MOV MINT, 00H MOV HEURE, #00H 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Code Timer
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 ORG 0073H\uc0\u8232 PUSH A\u8232 INT_TIMER2: DJNZ DIZMS, SORTIE MOV DIZMS, #100 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+\cf2 INC SEC\uc0\u8232 MOV A, SEC, #00H INC MINT\u8232 MOV A, MINT\u8232 CJNE A, #60, SORTIE MOV MINT, #00H INC HEURE\u8232 MOV A, HEURE CJNE A, #24, SORTIE MOV HEURE, #00H SORTIE : POP A 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 RETI \
+\
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\f0\fs32 \cf2 ; Sous-programme Afficheur LCD ; Table ASCII\uc0\u8232 
+\f1\fs29\fsmilli14667 TABLE_ASCII : DB, #30H // Numero 0 
+\f0\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 DB, #31H // Numero 1 DB, #32H // Numero 2 DB, #33H // Numero 3 DB, #34H // Numero 4 DB, #35H // Numero 5 DB, #36H // Numero 6 DB, #37H // Numero 7 DB, #38H // Numero 8 DB, #39H // Numero 9 DB, #3AH // : 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Temps 
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 TEMP_ASCII: MOV A, R0 DA A\uc0\u8232 ANL A,#F0 H \
+\
+SWAP A\uc0\u8232 MOV DPTR,#TABLE_ASCII MOV A,@A+DPTR 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Sous-programme Compteur des pas 
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 PAS_ASCII : MOV A, R0 DA A 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 RESET : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV MOV MOV MOV MOV MOV MOV 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV MOV MOV 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 PAS_MATIN_POIDS_FORT, #00H PAS_MATIN_POIDS_FAIBLE, #00H PAS_SOIR_POIDS_FORT, #00H PAS_SOIR_POIDS_FAIBLE, #00H INT_ENABLE, #00H 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INT_MAP, #00H DATA_FORMAT, #00H 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INT_ENABLE, #01000000 INT_MAP, #10111111 DATA_FORMAT, #00000010 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 PUSH A\uc0\u8232 MOV A, HEURE SUB A, #12\u8232 JB (PSW.1), MATIN SHORTJUMP SOIR 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INIT : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INT_PODOMETRE : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MATIN : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INC PAS_MATIN_POIDS_FAIBLE MOV A, PAS_MATIN_POIDS_FAIBLE CJNE A, #256, MATIN\uc0\u8232 MOV PAS_MATIN_POIDS_FAIBLE, #00 \
+\
+INC PAS_MATIN_POIDS_FORT MOV A, PAS_MATIN_POIDS_FORT JZ INT_PODOMETRE 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INC PAS_SOIR_POIDS_FAIBLE MOV A, PAS_SOIR_POIDS_FAIBLE CJNE A, #256, SOIR\uc0\u8232 MOV PAS_SOIR_POIDS_FAIBLE, #00 INC PAS_SOIR_POIDS_FORT\u8232 MOV A, PAS_SOIR_POIDS_FORT SHORTJUMP END 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 END : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 POP A RETI 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Sous-programme Calories 
+\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 RESET : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INIT : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 INT_CALORIE : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV min ,#00h\uc0\u8232 MOV INT_ENABLE, #00h MOV INT_MAP, #00h\u8232 MOV DATA_FORMAT, #00h 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV INT_ENABLE, #01000000 MOV INT_MAP, #10111111\uc0\u8232 MOV DATA_FORMAT, #00000010 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 PUSH A ;Conserve les donn\'e9es de l\'92accumulateur\uc0\u8232 PUSH B ;Conserve les donn\'e9es de l\'92accumulateur auxiliaire 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV A, VITESSE 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV B, MINUTE JNZ A, #9, RAPIDE 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 SUB A,#4\uc0\u8232 JB (PSW.1), LENT 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;D\'e9place dans l\'92accumulateur les donn\'e9es des vitesses r\'e9cup\'e9r\'e9es dans le programme de l\'92acc\'e9l\'e9rom\'e8tre 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;Quand la vitesse est sup\'e9rieure \'e0 9mk/h l\'92\'e9tiquette rapide 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;On enl\'e8ve 4 \'e0 la vitesse\uc0\u8232 ;Si vitesse n\'e9gative alors vitesse < 4km/h 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 JB (PSW.0), MOYEN INC min 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV B, min DIV B,#60 MOV K,#750 MUL K,B MOV A,K INC min 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV B, min DIV B,#60 MOV K,#200 MUL K,B MOV A,K INC min 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOV B, min\uc0\u8232 DIV B,#60\u8232 MOV K,#200\u8232 MUL K,B\u8232 MOV A,K SHORTJUMP END POP A 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 POP B RETI 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;Si vitesse sup\'e9rieur \'e0 0
+\f2 \uc0\u61664 
+\f1 4<v<8 km/h\uc0\u8232 ;A chaque minute o\'f9 la vitesse est sup\'e9rieure \'e0 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 9km/h, on incr\'e9mente le compteur 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;Transforme les minutes en heures\uc0\u8232 ;K coefficient calcul des calories\u8232 ;Multiplie le coefficient par la dur\'e9e de l\'92effort ;Met dans l\'92accumulateur la valeur calcul\'e9e avant 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;A chaque minute o\'f9 la vitesse est inf\'e9rieure \'e0 4km/h, on incr\'e9mente le compteur 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;Transforme les minutes en heures\uc0\u8232 ;K coefficient calcul des calories\u8232 ;Multiplie le coefficient par la dur\'e9e de l\'92effort ;Met dans l\'92accumulateur la valeur calcul\'e9e avant 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;A chaque minute o\'f9 la vitesse est comprise entre 4 .1 et 8km/h, on incr\'e9mente le compteur 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 ;Transforme les minutes en heures\uc0\u8232 ;K coefficient calcul des calories\u8232 ;Multiplie le coefficient par la dur\'e9e de l\'92effort ;Met dans l\'92accumulateur la valeur calcul\'e9e avant 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 LENT : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 MOYEN : 
+\f0\fs24 \
+
+\f1\fs29\fsmilli14667 END : 
+\f0\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\fs32 \cf2 ; Sous-programme Bluetooth 
+\fs24 \
+\pard\pardeftab720\sl360\sa240\partightenfactor0
+
+\f1\fs32 \cf2 MOV TMOD, #20H // timer 3, mode2 MOV TH3, #-3 //9600baud\uc0\u8232 MOV SCON,#50H // 8-bit,1stop,REN active SETB TR3 
+\f0\fs24 \
+
+\f1\fs32 ENVOI_ HEURE: ICIH : 
+\f0\fs24 \
+
+\f1\fs32 ENVOI_MINT : ICIM : 
+\f0\fs24 \
+
+\f1\fs32 ENVOI_SEC : ICIS : 
+\f0\fs24 \
+
+\f1\fs32 ENVOI_PAS1 : ICIP1 : 
+\f0\fs24 \
+
+\f1\fs32 ENVOI_PAS2 : ICIP2 : 
+\f0\fs24 \
+
+\f1\fs32 MOV SBUF, HEURE\uc0\u8232 JNB TI,ICI//Attendre l\'92envoi dernier bit CLR TI\u8232 SJMP ENVOI_MINT 
+\f0\fs24 \
+
+\f1\fs32 MOV SBUF, MINT JNB TI, ICI\uc0\u8232 CLR TI\u8232 SJMP ENVOI_SEC 
+\f0\fs24 \
+
+\f1\fs32 MOV SBUF, SEC JNB TI, ICI\uc0\u8232 CLR TI\u8232 SJMP ENVOI_PAS 
+\f0\fs24 \
+
+\f1\fs32 MOV SBUF , PAS_MATIN JNB TI,ICI\uc0\u8232 CLR TI\u8232 SJMP ENVOI_PAS2 
+\f0\fs24 \
+
+\f1\fs32 MOV SBUF, PAS_SOIR JNB TI, ICI\uc0\u8232 CLR TI\u8232 SJMP ENVOI_HEURE 
+\f0\fs24 \
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+\cf2 \
+\
+\
+\
+\pard\pardeftab720\sl340\sa240\partightenfactor0
+
+\f1\fs29\fsmilli14667 \cf2 \
+
+\f0\fs24 \
+}
